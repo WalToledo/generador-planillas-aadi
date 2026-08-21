@@ -46,7 +46,8 @@ src/
 │   └── App.tsx                   # Layout y ensamblado de las features
 ├── features/                     # Capacidades del negocio
 │   ├── songs/                    # Registrar y gestionar canciones
-│   │   ├── components/           # SongForm (Step 3), SongTable (Step 4)
+│   │   ├── components/
+│   │   │   └── SongForm.tsx      # Alta y edición (SongTable en Step 4)
 │   │   ├── hooks/
 │   │   │   └── useSongs.ts       # Estado songs + persistencia
 │   │   ├── types/
@@ -85,12 +86,14 @@ tsconfig.app.json                 # paths: @/* -> ./src/*
 * **Nota:** la clave de `localStorage` es `songs`. La lectura ocurre en el *lazy initializer* de `useState` y no en un `useEffect`: con dos efectos, el de guardado corre en el primer render y pisa lo guardado con `[]`. Es el mismo patrón de `src/shared/theme/useTheme.ts`.
 * **Nota:** el hook expone `{ songs, setSongs }`; las mutaciones (`addSong`, `updateSong`, `deleteSong`) se agregan en los Steps 3 y 4 junto a la UI que las consume.
 
-### Step 3: Formulario de Entrada y Validación (Top Section) (PENDING)
+### Step 3: Formulario de Entrada y Validación (Top Section) (DONE)
 * **Acción:** Crear el formulario con los 3 inputs usando Tailwind.
 * **Lógica de Validación (Edge Case):** 
   - El botón "Agregar" debe estar **deshabilitado** (`disabled`) si alguno de los tres campos está vacío.
   - Al hacer *hover* sobre el botón deshabilitado, se debe mostrar un mensaje (mediante `title` o un *tooltip* personalizado de Tailwind) que diga: **"Debe ingresar datos en las 3 casillas"**.
 * **Lógica de Envío:** Al hacer submit (cuando es válido), generar un ID único, agregar a `songs` y limpiar los inputs.
+* **Implementado en:** `src/features/songs/components/SongForm.tsx`, `src/features/songs/hooks/useSongs.ts`, `src/features/songs/index.ts`, `src/app/App.tsx`.
+* **Nota:** `SongForm` inicializa sus campos desde la prop `editingSong` en vez de sincronizarlos con un `useEffect` (oxlint rechaza `set-state-in-effect`); por eso, al conectar la edición hay que pasarle `key={editingSong?.id ?? 'new'}` para que se remonte al cambiar de canción.
 
 ### Step 4: Tabla de Visualización y Acciones (Middle Section) (PENDING)
 * **Acción:** Crear una tabla HTML con estilos modernos. Iterar sobre `songs` para las filas. Agregar una columna extra para botones de "Editar" y "Eliminar" (usar iconos).

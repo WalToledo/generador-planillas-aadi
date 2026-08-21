@@ -28,5 +28,10 @@ export function useSongs() {
     }
   }, [songs])
 
-  return { songs, setSongs }
+  // Actualización funcional: no depende del `songs` capturado en el render que creó el handler.
+  function addSong(data: Omit<Song, 'id'>) {
+    setSongs((prev) => [...prev, { ...data, id: crypto.randomUUID() }])
+  }
+
+  return { songs, addSong, setSongs }
 }
