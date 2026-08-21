@@ -1,10 +1,10 @@
-import { useSongs } from '@/features/songs'
+import { SongForm, useSongs } from '@/features/songs'
 import { ThemeToggle, useTheme } from '@/shared/theme'
 import { Section } from '@/shared/ui'
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme()
-  const { songs } = useSongs()
+  const { songs, addSong } = useSongs()
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-900 dark:text-slate-100">
@@ -24,7 +24,9 @@ function App() {
         <Section
           title="Nueva canción"
           description="Formulario de carga con nombre, intérprete y fecha de difusión."
-        />
+        >
+          <SongForm onSubmit={addSong} />
+        </Section>
         <Section
           title="Canciones registradas"
           description={
