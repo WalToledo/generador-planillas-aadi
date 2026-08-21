@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestor de Canciones</title>
+    <script>
+      // Aplica el tema antes del primer render para evitar el flash de modo claro.
+      // Sin preferencia guardada, el modo oscuro es el predeterminado.
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme')
+          document.documentElement.classList.toggle('dark', stored !== 'light')
+        } catch {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/app/main.tsx"></script>
+  </body>
+</html>
