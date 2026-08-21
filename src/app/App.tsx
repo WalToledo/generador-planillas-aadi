@@ -1,8 +1,10 @@
+import { useSongs } from '@/features/songs'
 import { ThemeToggle, useTheme } from '@/shared/theme'
 import { Section } from '@/shared/ui'
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme()
+  const { songs } = useSongs()
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-900 dark:text-slate-100">
@@ -25,7 +27,11 @@ function App() {
         />
         <Section
           title="Canciones registradas"
-          description="Tabla con las canciones cargadas y acciones para editar o eliminar."
+          description={
+            songs.length === 1
+              ? '1 canción cargada.'
+              : `${songs.length} canciones cargadas.`
+          }
         />
         <Section
           title="Exportar"
