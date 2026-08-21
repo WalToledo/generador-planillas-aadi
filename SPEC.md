@@ -47,7 +47,8 @@ src/
 ├── features/                     # Capacidades del negocio
 │   ├── songs/                    # Registrar y gestionar canciones
 │   │   ├── components/           # SongForm (Step 3), SongTable (Step 4)
-│   │   ├── hooks/                # useSongs (Step 2)
+│   │   ├── hooks/
+│   │   │   └── useSongs.ts       # Estado songs + persistencia
 │   │   ├── types/
 │   │   │   └── song.ts           # interface Song
 │   │   └── index.ts              # API pública de la feature
@@ -78,8 +79,11 @@ tsconfig.app.json                 # paths: @/* -> ./src/*
 * **Lógica:** Implementar un botón en la esquina superior para alternar entre modo claro y oscuro. La aplicación inicia en modo oscuro por defecto y la preferencia se persiste en `localStorage` bajo la clave `theme`.
 * **Implementado en:** `src/shared/theme/useTheme.ts` (estado y persistencia), `src/shared/theme/ThemeToggle.tsx` (botón con iconos), `src/shared/ui/Section.tsx` (contenedor reutilizable), `src/app/App.tsx` (layout base con las tres secciones) e `index.html` (script inline que aplica la clase `dark` antes del primer render para evitar el flash de tema claro).
 
-### Step 2: Estado y Persistencia (localStorage) (PENDING)
+### Step 2: Estado y Persistencia (localStorage) (DONE)
 * **Acción:** Crear el estado `songs` tipado correctamente con TypeScript. Implementar un `useEffect` que lea de `localStorage` al cargar la página y otro que guarde cada vez que el array `songs` cambie.
+* **Implementado en:** `src/features/songs/hooks/useSongs.ts`, `src/features/songs/index.ts`, `src/app/App.tsx`.
+* **Nota:** la clave de `localStorage` es `songs`. La lectura ocurre en el *lazy initializer* de `useState` y no en un `useEffect`: con dos efectos, el de guardado corre en el primer render y pisa lo guardado con `[]`. Es el mismo patrón de `src/shared/theme/useTheme.ts`.
+* **Nota:** el hook expone `{ songs, setSongs }`; las mutaciones (`addSong`, `updateSong`, `deleteSong`) se agregan en los Steps 3 y 4 junto a la UI que las consume.
 
 ### Step 3: Formulario de Entrada y Validación (Top Section) (PENDING)
 * **Acción:** Crear el formulario con los 3 inputs usando Tailwind.
