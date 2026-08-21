@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { SongForm, SongTable, useSongs } from '@/features/songs'
 import type { Song } from '@/features/songs'
+import { ExportButton } from '@/features/spreadsheet'
 import { ThemeToggle, useTheme } from '@/shared/theme'
 import { Section } from '@/shared/ui'
 
@@ -72,7 +73,9 @@ function App() {
         <Section
           title="Exportar"
           description="Descarga de la planilla en formato .xlsx."
-        />
+        >
+          <ExportButton songs={songs} />
+        </Section>
       </main>
     </div>
   )
