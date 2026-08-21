@@ -33,5 +33,15 @@ export function useSongs() {
     setSongs((prev) => [...prev, { ...data, id: crypto.randomUUID() }])
   }
 
-  return { songs, addSong, setSongs }
+  function updateSong(id: string, data: Omit<Song, 'id'>) {
+    setSongs((prev) =>
+      prev.map((song) => (song.id === id ? { ...song, ...data } : song)),
+    )
+  }
+
+  function deleteSong(id: string) {
+    setSongs((prev) => prev.filter((song) => song.id !== id))
+  }
+
+  return { songs, addSong, updateSong, deleteSong, setSongs }
 }

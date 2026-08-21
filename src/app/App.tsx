@@ -1,10 +1,31 @@
-import { SongForm, useSongs } from '@/features/songs'
+import { useState } from 'react'
+import { SongForm, SongTable, useSongs } from '@/features/songs'
+import type { Song } from '@/features/songs'
 import { ThemeToggle, useTheme } from '@/shared/theme'
 import { Section } from '@/shared/ui'
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme()
-  const { songs, addSong } = useSongs()
+  const { songs, addSong, updateSong, deleteSong } = useSongs()
+  const [editingId, setEditingId] = useState<string | null>(null)
+
+  // La canción en edición se deriva del array: guardarla en estado la dejaría desincronizada.
+  const editingSong = songs.find((song) => song.id === editingId) ?? null
+
+  function handleSubmit(data: Omit<Song, 'id'>) {
+    if (editingId) {
+      updateSong(editingId, data)
+      setEditingId(null)
+      return
+    }
+    addSong(data)
+  }
+
+  function handleDelete(id: string) {
+    deleteSong(id)
+    // Borrar la fila en edición debe cerrar el modo edición, no dejar el form colgado.
+    if (id === editingId) setEditingId(null)
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-900 dark:text-slate-100">
@@ -25,7 +46,13 @@ function App() {
           title="Nueva canción"
           description="Formulario de carga con nombre, intérprete y fecha de difusión."
         >
-          <SongForm onSubmit={addSong} />
+          {/* La `key` remonta el form al cambiar de canción: así los campos se resetean sin efecto. */}
+          <SongForm
+            key={editingSong?.id ?? 'new'}
+            onSubmit={handleSubmit}
+            editingSong={editingSong}
+            onCancelEdit={() => setEditingId(null)}
+          />
         </Section>
         <Section
           title="Canciones registradas"
@@ -34,7 +61,14 @@ function App() {
               ? '1 canción cargada.'
               : `${songs.length} canciones cargadas.`
           }
-        />
+        >
+          <SongTable
+            songs={songs}
+            editingId={editingId}
+            onEdit={(song) => setEditingId(song.id)}
+            onDelete={handleDelete}
+          />
+        </Section>
         <Section
           title="Exportar"
           description="Descarga de la planilla en formato .xlsx."
