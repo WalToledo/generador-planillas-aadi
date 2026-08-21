@@ -49,7 +49,7 @@ export function SongForm({ onSubmit, editingSong, onCancelEdit }: SongFormProps)
             type="text"
             value={nombre}
             onChange={(event) => setNombre(event.target.value)}
-            placeholder="Ej: Cambalache"
+            placeholder="Ingrese nombre"
             className={inputClasses}
           />
         </div>
@@ -63,7 +63,7 @@ export function SongForm({ onSubmit, editingSong, onCancelEdit }: SongFormProps)
             type="text"
             value={interprete}
             onChange={(event) => setInterprete(event.target.value)}
-            placeholder="Ej: Julio Sosa"
+            placeholder="Ingrese intérprete"
             className={inputClasses}
           />
         </div>

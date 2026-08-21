@@ -55,9 +55,11 @@ src/
 │   │   │   └── song.ts           # interface Song
 │   │   └── index.ts              # API pública de la feature
 │   └── spreadsheet/              # Generar y descargar la planilla .xlsx
-│       ├── components/           # ExportButton (Step 5)
-│       ├── lib/                  # exportSongsToExcel (Step 5)
-│       └── index.ts
+│       ├── components/
+│       │   └── ExportButton.tsx  # Botón de descarga
+│       ├── lib/
+│       │   └── exportSongsToExcel.ts  # Armado de la hoja y descarga
+│       └── index.ts              # API pública de la feature
 ├── shared/                       # Transversal, sin lógica de negocio
 │   ├── theme/
 │   │   ├── useTheme.ts           # Estado del tema + persistencia
@@ -103,8 +105,11 @@ tsconfig.app.json                 # paths: @/* -> ./src/*
 * **Implementado en:** `src/features/songs/components/SongTable.tsx`, `src/features/songs/components/SongForm.tsx`, `src/features/songs/hooks/useSongs.ts`, `src/features/songs/index.ts`, `src/app/App.tsx`.
 * **Nota:** la fecha se persiste como `YYYY-MM-DD` (formato nativo de `input type="date"`) y se muestra `dd/mm/aaaa` partiendo el string, no con `new Date()`, que lo interpreta como UTC y corre un día según la zona horaria. La exportación del Step 5 debe respetar la misma restricción.
 
-### Step 5: Exportación a Excel (Bottom Section) (PENDING)
+### Step 5: Exportación a Excel (Bottom Section) (DONE)
 * **Acción:** Implementar la exportación usando la librería `xlsx`. Transformar el array `songs` (omitiendo el `id` interno) en una hoja de cálculo y descargar el archivo `canciones.xlsx`.
+* **Implementado en:** `src/features/spreadsheet/lib/exportSongsToExcel.ts`, `src/features/spreadsheet/components/ExportButton.tsx`, `src/features/spreadsheet/index.ts`, `src/app/App.tsx`.
+* **Nota:** `xlsx` se instala desde el CDN oficial de SheetJS (`npm i --save https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`), no desde el registro público de npm, que está congelado en 0.18.5 y arrastra CVE-2023-30533 y un ReDoS. Queda en `package.json` como URL de tarball: el build de Vercel (Step 6) depende de que ese CDN responda.
+* **Nota:** la feature no importa el tipo `Song` (regla 4 de dependencias): define su propia interfaz `SongRow` sin `id`, a la que `Song` es asignable estructuralmente. Por lo mismo duplica el `formatFecha` de `SongTable`, ya que la fecha se exporta como texto `dd/mm/aaaa`.
 
 ### Step 6: Preparación para Despliegue en Vercel (Deployment) (PENDING)
 * **Acción:** Verificar que el script `build` en `package.json` funcione correctamente. Asegurar que no haya errores de tipado de TypeScript o variables sin usar que puedan hacer fallar la compilación automática de Vercel.
