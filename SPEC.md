@@ -47,7 +47,8 @@ src/
 ├── features/                     # Capacidades del negocio
 │   ├── songs/                    # Registrar y gestionar canciones
 │   │   ├── components/
-│   │   │   └── SongForm.tsx      # Alta y edición (SongTable en Step 4)
+│   │   │   ├── SongForm.tsx      # Alta y edición
+│   │   │   └── SongTable.tsx     # Listado con acciones de editar y eliminar
 │   │   ├── hooks/
 │   │   │   └── useSongs.ts       # Estado songs + persistencia
 │   │   ├── types/
@@ -95,10 +96,12 @@ tsconfig.app.json                 # paths: @/* -> ./src/*
 * **Implementado en:** `src/features/songs/components/SongForm.tsx`, `src/features/songs/hooks/useSongs.ts`, `src/features/songs/index.ts`, `src/app/App.tsx`.
 * **Nota:** `SongForm` inicializa sus campos desde la prop `editingSong` en vez de sincronizarlos con un `useEffect` (oxlint rechaza `set-state-in-effect`); por eso, al conectar la edición hay que pasarle `key={editingSong?.id ?? 'new'}` para que se remonte al cambiar de canción.
 
-### Step 4: Tabla de Visualización y Acciones (Middle Section) (PENDING)
+### Step 4: Tabla de Visualización y Acciones (Middle Section) (DONE)
 * **Acción:** Crear una tabla HTML con estilos modernos. Iterar sobre `songs` para las filas. Agregar una columna extra para botones de "Editar" y "Eliminar" (usar iconos).
 * **Lógica de Eliminar:** Filtrar el array `songs` para remover el ID seleccionado.
 * **Lógica de Editar:** Al hacer clic, cargar los datos de la fila en los inputs superiores y cambiar el texto/estado del botón principal a "Guardar Cambios".
+* **Implementado en:** `src/features/songs/components/SongTable.tsx`, `src/features/songs/components/SongForm.tsx`, `src/features/songs/hooks/useSongs.ts`, `src/features/songs/index.ts`, `src/app/App.tsx`.
+* **Nota:** la fecha se persiste como `YYYY-MM-DD` (formato nativo de `input type="date"`) y se muestra `dd/mm/aaaa` partiendo el string, no con `new Date()`, que lo interpreta como UTC y corre un día según la zona horaria. La exportación del Step 5 debe respetar la misma restricción.
 
 ### Step 5: Exportación a Excel (Bottom Section) (PENDING)
 * **Acción:** Implementar la exportación usando la librería `xlsx`. Transformar el array `songs` (omitiendo el `id` interno) en una hoja de cálculo y descargar el archivo `canciones.xlsx`.
