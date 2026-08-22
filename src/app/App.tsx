@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { SongForm, SongTable, useSongs } from '@/features/songs'
 import type { Song } from '@/features/songs'
-import { ExportButton } from '@/features/spreadsheet'
+import { ExportPanel } from '@/features/spreadsheet'
 import { UserProfileForm, useUserProfile } from '@/features/userProfile'
 import { ThemeToggle, useTheme } from '@/shared/theme'
 import { Section, Tabs } from '@/shared/ui'
@@ -90,9 +90,13 @@ function App() {
             </Section>
             <Section
               title="Exportar"
-              description="Descarga de la planilla en formato .xlsx."
+              description="Metadatos de la declaración y descarga de la planilla en formato .xlsx."
             >
-              <ExportButton songs={songs} />
+              <ExportPanel
+                songs={songs}
+                userProfile={userProfile}
+                onCuitChange={(cuit) => updateField('cuit', cuit)}
+              />
             </Section>
           </>
         ) : (
