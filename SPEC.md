@@ -142,15 +142,18 @@ tsconfig.app.json                 # paths: @/* -> ./src/*
 * **Nota:** el formulario persiste al tipear, sin botón "Guardar", igual que `useSongs` y `useTheme`; por eso `useUserProfile` expone `updateField(campo, valor)`, que es también el `onCuitChange` que necesita el Step 7.
 * **Nota:** `inputClasses` y `labelClasses` se movieron de `SongForm.tsx` a `src/shared/ui/formClasses.ts`; el `ExportPanel` del Step 7 debe importarlas de ahí en vez de redefinirlas.
 
-### Step 7: Refactor de UI - Módulo Exportar con Metadatos (PENDING)
+### Step 7: Refactor de UI - Módulo Exportar con Metadatos (DONE)
 * **Acción:** Refactorizar la sección inferior de exportación (la que se hizo en el Step 5), renombrando `ExportButton.tsx` a `ExportPanel.tsx`.
 * **UI:** Al lado del botón "Exportar", agregar dos inputs de texto obligatorios: "CUIT" y "Mes y Año".
 * **Lógica:** El botón de exportación debe estar **deshabilitado** si alguno de estos dos campos está vacío, con el mismo patrón de `title`/tooltip usado en el `SongForm` del Step 3.
 * **Estado:**
   - `cuit` llega **por props** (`cuit` + `onCuitChange`) desde `App.tsx`, que las conecta a `useUserProfile`: el valor se persiste, así el usuario no lo reescribe cada mes.
   - `mesAnio` es `useState` local de `ExportPanel` y no se persiste: cambia en cada declaración y debe reingresarse.
+* **Implementado en:** `src/features/spreadsheet/components/ExportPanel.tsx`, `src/features/spreadsheet/index.ts`, `src/app/App.tsx`.
+* **Nota:** el botón suma a las dos validaciones nuevas la condición previa de que haya al menos una canción; el tooltip cambia de texto según cuál falte.
+* **Nota:** como `mesAnio` vive dentro del panel, el payload de exportación se arma ahí; por eso el Step 8 cambió la prop `cuit` por el `userProfile` completo, con el CUIT adentro.
 
-### Step 8: Refactorización de Exportación a Excel - Planilla AADI (PENDING)
+### Step 8: Refactorización de Exportación a Excel - Planilla AADI (DONE)
 * **Acción:** Reemplazar la librería `xlsx` por `exceljs` y `file-saver` para generar la Declaración Jurada formal con diseño y estilos. Desinstalar `xlsx`, instalar `exceljs`, `file-saver` y `@types/file-saver`. Renombrar `lib/exportSongsToExcel.ts` a `lib/exportPlanillaAadi.ts`.
 * **Integración:** La función recibe un único parámetro `{ songs, userProfile, mesAnio }`, ensamblado en `App.tsx` a partir de `useSongs` (Step 2), `useUserProfile` (Step 6) y el estado local del `ExportPanel` (Step 7). El CUIT viaja dentro de `userProfile`.
 * **Tipos:** la feature sigue sin importar tipos de otras features (regla 4): declara sus propias interfaces estructurales, a las que `Song` y `UserProfile` son asignables.
@@ -160,6 +163,11 @@ tsconfig.app.json                 # paths: @/* -> ./src/*
   3. **Canciones:** Dejar espacio. Fila de encabezados ("Nombre de la Canción", "Intérprete", "Fecha de Difusión") con fondo gris claro, negrita y bordes. Iterar `songs` e inyectar los registros.
 * **Nota:** la fecha se sigue formateando `dd/mm/aaaa` partiendo el string `YYYY-MM-DD`, nunca con `new Date()` (restricción heredada del Step 4).
 * **Descarga:** Ejecutar `saveAs(blob, "Planilla_AADI.xlsx")`.
+* **Implementado en:** `src/features/spreadsheet/lib/exportPlanillaAadi.ts`, `src/features/spreadsheet/components/ExportPanel.tsx`, `src/features/spreadsheet/index.ts`, `src/app/App.tsx`.
+* **Nota:** el payload se arma en `ExportPanel`, no en `App.tsx`: `mesAnio` es estado local del panel (Step 7). `App.tsx` le pasa `songs` y `userProfile`.
+* **Nota:** la planilla usa cuatro columnas, porque el bloque de datos del usuario son dos pares etiqueta/valor por fila; la tabla de canciones combina A:B para el nombre y así ocupa el mismo ancho.
+* **Nota:** `import ExcelJS from 'exceljs'` resuelve al bundle de navegador por el campo `browser` del paquete, sin polyfills de Node.
+* **Nota:** ExcelJS pesa más que toda la app y sólo hace falta al descargar, así que `ExportPanel` carga `exportPlanillaAadi` con `import()` dinámico y queda en un chunk aparte (bundle inicial ~208 kB en vez de ~1.141 kB). Por eso el *barrel* de la feature **no** reexporta la función: un reexport estático la devolvería al bundle inicial. La descarga pasa a ser asíncrona y el botón muestra "Generando…" mientras corre.
 
 ### Step 9: Preparación para Despliegue en Vercel (Deployment) (PENDING)
 * **Acción:** Verificar que el script `build` en `package.json` funcione correctamente, ya con el stack migrado a `exceljs` (sin el tarball de CDN del Step 5). Asegurar que no haya errores de tipado de TypeScript o variables sin usar que puedan hacer fallar la compilación automática de Vercel.
