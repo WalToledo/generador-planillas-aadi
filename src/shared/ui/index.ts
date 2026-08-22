@@ -1,2 +1,5 @@
 export { Section } from './Section'
 export type { SectionProps } from './Section'
+export { Tabs } from './Tabs'
+export type { TabItem, TabsProps } from './Tabs'
+export { inputClasses, labelClasses } from './formClasses'

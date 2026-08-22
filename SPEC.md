@@ -87,6 +87,7 @@ src/
 │   └── ui/
 │       ├── Section.tsx           # Contenedor con encabezado
 │       ├── Tabs.tsx              # Navegación por pestañas (genérica)
+│       ├── formClasses.ts        # Clases Tailwind de inputs y labels
 │       └── index.ts
 └── index.css                     # Tailwind + variante dark
 
@@ -131,12 +132,15 @@ tsconfig.app.json                 # paths: @/* -> ./src/*
 * **Nota (superada por el Step 8):** `xlsx` se instaló desde el CDN oficial de SheetJS (`npm i --save https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`) y no desde el registro público de npm, congelado en 0.18.5 y con CVE-2023-30533 más un ReDoS. Eso dejaba el build dependiendo de que ese CDN respondiera; el Step 8 retira la dependencia y el riesgo desaparece.
 * **Nota:** la feature no importa el tipo `Song` (regla 4 de dependencias): define su propia interfaz `SongRow` sin `id`, a la que `Song` es asignable estructuralmente. Por lo mismo duplica el `formatFecha` de `SongTable`, ya que la fecha se exporta como texto `dd/mm/aaaa`.
 
-### Step 6: Feature - Pestaña "Datos del Usuario" (PENDING)
+### Step 6: Feature - Pestaña "Datos del Usuario" (DONE)
 * **Acción:** Modificar el layout principal (`App.tsx`) para incluir un sistema de navegación por pestañas (Tabs) que permita alternar entre "Canciones" y "Datos del Usuario".
 * **UI (Tabs):** El componente de pestañas vive en `src/shared/ui/Tabs.tsx`: es genérico, sin lógica de negocio, y recibe las pestañas y la activa por props. El estado `activeTab` vive en `App.tsx`.
 * **UI (Formulario):** Crear la feature `userProfile` con su componente `UserProfileForm.tsx`. El formulario debe ser una cuadrícula (grid de 2 columnas) con los campos: Nombre comercial, Razón Social, Domicilio fiscal, Provincia, e-mail (Columna 1) y Frecuencia y emisora, Whatsapp, Localidad, Cód.Postal, Contacto (Columna 2).
 * **Lógica:** Implementar `useUserProfile.ts` para persistir estos datos fijos en `localStorage` bajo la clave `userProfile`. Sigue el patrón de `useSongs`/`useTheme`: la lectura ocurre en el *lazy initializer* de `useState`, nunca en un `useEffect`.
 * **Nota:** el objeto `UserProfile` incluye además el campo `cuit`, aunque **no** se edita en esta cuadrícula sino en el módulo de exportación (Step 7). Se guarda acá porque es un dato fijo del usuario, no de la declaración del mes.
+* **Implementado en:** `src/features/userProfile/types/userProfile.ts`, `src/features/userProfile/hooks/useUserProfile.ts`, `src/features/userProfile/components/UserProfileForm.tsx`, `src/features/userProfile/index.ts`, `src/shared/ui/Tabs.tsx`, `src/shared/ui/formClasses.ts`, `src/shared/ui/index.ts`, `src/features/songs/components/SongForm.tsx`, `src/app/App.tsx`.
+* **Nota:** el formulario persiste al tipear, sin botón "Guardar", igual que `useSongs` y `useTheme`; por eso `useUserProfile` expone `updateField(campo, valor)`, que es también el `onCuitChange` que necesita el Step 7.
+* **Nota:** `inputClasses` y `labelClasses` se movieron de `SongForm.tsx` a `src/shared/ui/formClasses.ts`; el `ExportPanel` del Step 7 debe importarlas de ahí en vez de redefinirlas.
 
 ### Step 7: Refactor de UI - Módulo Exportar con Metadatos (PENDING)
 * **Acción:** Refactorizar la sección inferior de exportación (la que se hizo en el Step 5), renombrando `ExportButton.tsx` a `ExportPanel.tsx`.

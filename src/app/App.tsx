@@ -2,13 +2,25 @@ import { useState } from 'react'
 import { SongForm, SongTable, useSongs } from '@/features/songs'
 import type { Song } from '@/features/songs'
 import { ExportButton } from '@/features/spreadsheet'
+import { UserProfileForm, useUserProfile } from '@/features/userProfile'
 import { ThemeToggle, useTheme } from '@/shared/theme'
-import { Section } from '@/shared/ui'
+import { Section, Tabs } from '@/shared/ui'
+import type { TabItem } from '@/shared/ui'
+
+type TabId = 'songs' | 'profile'
+
+const TABS: readonly TabItem<TabId>[] = [
+  { id: 'songs', label: 'Canciones' },
+  { id: 'profile', label: 'Datos del Usuario' },
+]
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme()
   const { songs, addSong, updateSong, deleteSong } = useSongs()
+  const { userProfile, updateField } = useUserProfile()
   const [editingId, setEditingId] = useState<string | null>(null)
+  // La pestaña visible no se persiste: cada sesión arranca en la carga de canciones.
+  const [activeTab, setActiveTab] = useState<TabId>('songs')
 
   // La canción en edición se deriva del array: guardarla en estado la dejaría desincronizada.
   const editingSong = songs.find((song) => song.id === editingId) ?? null
@@ -42,40 +54,55 @@ function App() {
         </div>
       </header>
 
+      <div className="mx-auto max-w-4xl px-4">
+        <Tabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+
       <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-        <Section
-          title="Nueva canción"
-          description="Formulario de carga con nombre, intérprete y fecha de difusión."
-        >
-          {/* La `key` remonta el form al cambiar de canción: así los campos se resetean sin efecto. */}
-          <SongForm
-            key={editingSong?.id ?? 'new'}
-            onSubmit={handleSubmit}
-            editingSong={editingSong}
-            onCancelEdit={() => setEditingId(null)}
-          />
-        </Section>
-        <Section
-          title="Canciones registradas"
-          description={
-            songs.length === 1
-              ? '1 canción cargada.'
-              : `${songs.length} canciones cargadas.`
-          }
-        >
-          <SongTable
-            songs={songs}
-            editingId={editingId}
-            onEdit={(song) => setEditingId(song.id)}
-            onDelete={handleDelete}
-          />
-        </Section>
-        <Section
-          title="Exportar"
-          description="Descarga de la planilla en formato .xlsx."
-        >
-          <ExportButton songs={songs} />
-        </Section>
+        {activeTab === 'songs' ? (
+          <>
+            <Section
+              title="Nueva canción"
+              description="Formulario de carga con nombre, intérprete y fecha de difusión."
+            >
+              {/* La `key` remonta el form al cambiar de canción: así los campos se resetean sin efecto. */}
+              <SongForm
+                key={editingSong?.id ?? 'new'}
+                onSubmit={handleSubmit}
+                editingSong={editingSong}
+                onCancelEdit={() => setEditingId(null)}
+              />
+            </Section>
+            <Section
+              title="Canciones registradas"
+              description={
+                songs.length === 1
+                  ? '1 canción cargada.'
+                  : `${songs.length} canciones cargadas.`
+              }
+            >
+              <SongTable
+                songs={songs}
+                editingId={editingId}
+                onEdit={(song) => setEditingId(song.id)}
+                onDelete={handleDelete}
+              />
+            </Section>
+            <Section
+              title="Exportar"
+              description="Descarga de la planilla en formato .xlsx."
+            >
+              <ExportButton songs={songs} />
+            </Section>
+          </>
+        ) : (
+          <Section
+            title="Datos del Usuario"
+            description="Datos fijos del radiodifusor. Se guardan automáticamente y se inyectan en la planilla exportada."
+          >
+            <UserProfileForm userProfile={userProfile} onFieldChange={updateField} />
+          </Section>
+        )}
       </main>
     </div>
   )
