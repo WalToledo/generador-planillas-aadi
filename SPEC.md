@@ -5,7 +5,7 @@ Aplicación web de una sola página (SPA) moderna para registrar datos de cancio
 
 La interfaz se organiza en dos **pestañas**:
 1. **Canciones:** la pestaña principal, con tres partes:
-   - **Entrada de datos:** Formulario para ingresar "Nombre de la canción", "Intérprete" y "Fecha de difusión". Incluye validación estricta de campos.
+   - **Entrada de datos:** Formulario para ingresar "Nombre de la canción", "Intérprete", "Fecha de difusión" y "Cantidad de salidas". Incluye validación estricta de campos.
    - **Visualización y Gestión:** Tabla de canciones con opciones para **editar** y **eliminar** cada registro.
    - **Exportación:** Módulo inferior con los metadatos de la declaración (CUIT y Mes y Año) y el botón para descargar la planilla `.xlsx`.
 2. **Datos del Usuario:** Formulario con los datos fijos del radiodifusor (razón social, domicilio, contacto, etc.), que se inyectan en la planilla exportada.
@@ -25,7 +25,7 @@ La exportación no es un volcado plano de la tabla: genera la **Declaración Jur
 ## 3. Data Model & State Management
 Usar interfaces de TypeScript para definir todos estos tipos.
 
-* `songs`: Array de objetos `{ id: string, nombre: string, interprete: string, fecha: string }` persistido en `localStorage` bajo la clave `songs`.
+* `songs`: Array de objetos `{ id: string, nombre: string, interprete: string, fecha: string, salidas: number }` persistido en `localStorage` bajo la clave `songs`. `salidas` es la cantidad de veces que la canción salió al aire en el mes, entero ≥ 1.
 * `userProfile`: Objeto con los datos fijos del radiodifusor, persistido en `localStorage` bajo la clave `userProfile`:
   `{ nombreComercial, razonSocial, domicilioFiscal, provincia, email, frecuenciaEmisora, whatsapp, localidad, codigoPostal, contacto, cuit }` (todos `string`).
 * `isDarkMode`: Booleano para controlar el tema visual, inicializado en `true` por defecto.
@@ -165,9 +165,20 @@ tsconfig.app.json                 # paths: @/* -> ./src/*
 * **Descarga:** Ejecutar `saveAs(blob, "Planilla_AADI.xlsx")`.
 * **Implementado en:** `src/features/spreadsheet/lib/exportPlanillaAadi.ts`, `src/features/spreadsheet/components/ExportPanel.tsx`, `src/features/spreadsheet/index.ts`, `src/app/App.tsx`.
 * **Nota:** el payload se arma en `ExportPanel`, no en `App.tsx`: `mesAnio` es estado local del panel (Step 7). `App.tsx` le pasa `songs` y `userProfile`.
-* **Nota:** la planilla usa cuatro columnas, porque el bloque de datos del usuario son dos pares etiqueta/valor por fila; la tabla de canciones combina A:B para el nombre y así ocupa el mismo ancho.
+* **Nota (ampliada por el Step 9):** la planilla usaba cuatro columnas, porque el bloque de datos del usuario son dos pares etiqueta/valor por fila; la tabla de canciones combina A:B para el nombre y así ocupa el mismo ancho. Con la columna de salidas la tabla pasa a cinco.
 * **Nota:** `import ExcelJS from 'exceljs'` resuelve al bundle de navegador por el campo `browser` del paquete, sin polyfills de Node.
 * **Nota:** ExcelJS pesa más que toda la app y sólo hace falta al descargar, así que `ExportPanel` carga `exportPlanillaAadi` con `import()` dinámico y queda en un chunk aparte (bundle inicial ~208 kB en vez de ~1.141 kB). Por eso el *barrel* de la feature **no** reexporta la función: un reexport estático la devolvería al bundle inicial. La descarga pasa a ser asíncrona y el botón muestra "Generando…" mientras corre.
 
-### Step 9: Preparación para Despliegue en Vercel (Deployment) (PENDING)
+### Step 9: Cantidad de Salidas por Canción (DONE)
+* **Acción:** Registrar cuántas veces se difundió cada canción en el mes y llevar el dato de punta a punta: formulario, `localStorage`, tabla y planilla exportada.
+* **Modelo:** `Song` suma `salidas: number` (entero ≥ 1).
+* **UI (Formulario):** En "Nueva canción", un cuarto input `type="number"` (`min="1"`, `step="1"`) con label "Cantidad de salidas". **Viene precargado con `1`** y es editable: quien no lo toque declara una salida. Tras un alta exitosa vuelve a `1`, no a vacío, a diferencia de los otros tres campos.
+* **Validación:** el campo es obligatorio; el botón se deshabilita si está vacío o no es un entero ≥ 1, y el tooltip pasa a decir **"Debe ingresar datos en las 4 casillas"**.
+* **UI (Tabla):** nueva columna "Salidas" entre "Fecha" y "Acciones", alineada a la derecha por ser numérica.
+* **Excel:** la planilla pasa de cuatro a **cinco columnas**. La tabla de canciones suma "Cantidad de Salidas" en la columna E, al lado de "Fecha de Difusión", con el mismo encabezado gris y bordes. El valor se escribe como número, no como texto, para poder sumar la columna.
+* **Implementado en:** `src/features/songs/types/song.ts`, `src/features/songs/hooks/useSongs.ts`, `src/features/songs/components/SongForm.tsx`, `src/features/songs/components/SongTable.tsx`, `src/features/spreadsheet/lib/exportPlanillaAadi.ts`, `src/app/App.tsx`.
+* **Nota (retrocompatibilidad):** las canciones guardadas antes de este Step no tienen `salidas`. `readStoredSongs` las normaliza a `1` al hidratar y el efecto de guardado las reescribe ya migradas; así la tabla nunca muestra `undefined` ni `NaN`.
+* **Nota:** `borderRow` recibe un `lastCol` opcional (4 por defecto). El bloque de datos del usuario sigue bordeando cuatro columnas —son dos pares etiqueta/valor por fila— y sólo el encabezado y las filas de canciones piden 5; si no, la columna E quedaría vacía y bordeada al costado de los datos del usuario. Por el ancho real de la tabla, el título de la fila 1 combina `A1:E1` mientras que el bloque negro "Datos del Usuario" se mantiene en `A4:D4`.
+
+### Step 10: Preparación para Despliegue en Vercel (Deployment) (PENDING)
 * **Acción:** Verificar que el script `build` en `package.json` funcione correctamente, ya con el stack migrado a `exceljs` (sin el tarball de CDN del Step 5). Asegurar que no haya errores de tipado de TypeScript o variables sin usar que puedan hacer fallar la compilación automática de Vercel.

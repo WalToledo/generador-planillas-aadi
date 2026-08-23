@@ -3,6 +3,9 @@ import type { FormEvent } from 'react'
 import { inputClasses, labelClasses } from '@/shared/ui'
 import type { Song } from '../types/song'
 
+/** Salidas por defecto: la canción se declara al menos una vez. */
+const DEFAULT_SALIDAS = '1'
+
 export interface SongFormProps {
   onSubmit: (data: Omit<Song, 'id'>) => void
   /**
@@ -19,23 +22,41 @@ export function SongForm({ onSubmit, editingSong, onCancelEdit }: SongFormProps)
   const [nombre, setNombre] = useState(editingSong?.nombre ?? '')
   const [interprete, setInterprete] = useState(editingSong?.interprete ?? '')
   const [fecha, setFecha] = useState(editingSong?.fecha ?? '')
+  // Se guarda como string, igual que el resto de los inputs, y arranca en 1 para no obligar a tipearlo.
+  const [salidas, setSalidas] = useState(
+    editingSong ? String(editingSong.salidas) : DEFAULT_SALIDAS,
+  )
 
   // El trim evita que un campo con solo espacios pase como dato válido.
-  const isValid = nombre.trim() !== '' && interprete.trim() !== '' && fecha !== ''
+  const salidasNumero = Number(salidas)
+  const isValid =
+    nombre.trim() !== '' &&
+    interprete.trim() !== '' &&
+    fecha !== '' &&
+    salidas !== '' &&
+    Number.isInteger(salidasNumero) &&
+    salidasNumero >= 1
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!isValid) return
 
-    onSubmit({ nombre: nombre.trim(), interprete: interprete.trim(), fecha })
+    onSubmit({
+      nombre: nombre.trim(),
+      interprete: interprete.trim(),
+      fecha,
+      salidas: salidasNumero,
+    })
     setNombre('')
     setInterprete('')
     setFecha('')
+    // Las salidas vuelven al valor por defecto, no a vacío: el form queda listo para la próxima carga.
+    setSalidas(DEFAULT_SALIDAS)
   }
 
   return (
     <form onSubmit={handleSubmit} className="mt-4">
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <label htmlFor="song-nombre" className={labelClasses}>
             Nombre de la canción
@@ -76,6 +97,21 @@ export function SongForm({ onSubmit, editingSong, onCancelEdit }: SongFormProps)
             className={inputClasses}
           />
         </div>
+
+        <div>
+          <label htmlFor="song-salidas" className={labelClasses}>
+            Cantidad de salidas
+          </label>
+          <input
+            id="song-salidas"
+            type="number"
+            min="1"
+            step="1"
+            value={salidas}
+            onChange={(event) => setSalidas(event.target.value)}
+            className={inputClasses}
+          />
+        </div>
       </div>
 
       <div className="mt-4 flex items-center gap-2">
@@ -94,7 +130,7 @@ export function SongForm({ onSubmit, editingSong, onCancelEdit }: SongFormProps)
               role="tooltip"
               className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-max -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-slate-700"
             >
-              Debe ingresar datos en las 3 casillas
+              Debe ingresar datos en las 4 casillas
             </span>
           )}
         </div>
