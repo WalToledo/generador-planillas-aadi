@@ -4,4 +4,6 @@ export interface Song {
   nombre: string
   interprete: string
   fecha: string
+  /** Cantidad de veces que la canción salió al aire en el mes declarado. Mínimo 1. */
+  salidas: number
 }

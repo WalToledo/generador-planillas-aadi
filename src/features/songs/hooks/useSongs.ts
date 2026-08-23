@@ -3,13 +3,23 @@ import type { Song } from '../types/song'
 
 const STORAGE_KEY = 'songs'
 
+/**
+ * Las canciones guardadas antes del Step 9 no tienen `salidas`. Se las normaliza a 1
+ * al hidratar: el efecto de guardado las reescribe ya con el campo, así la migración
+ * ocurre sola y la tabla nunca muestra `undefined` ni `NaN`.
+ */
+function normalizeSong(song: Song): Song {
+  const salidas = Number(song.salidas)
+  return Number.isInteger(salidas) && salidas >= 1 ? song : { ...song, salidas: 1 }
+}
+
 function readStoredSongs(): Song[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (!stored) return []
     const parsed: unknown = JSON.parse(stored)
     // Solo confiamos en el dato si sigue siendo una lista: el contenido lo escribe esta misma app.
-    return Array.isArray(parsed) ? (parsed as Song[]) : []
+    return Array.isArray(parsed) ? (parsed as Song[]).map(normalizeSong) : []
   } catch {
     // Cubre localStorage no disponible (modo privado) y JSON corrupto.
     return []

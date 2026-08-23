@@ -63,7 +63,7 @@ function App() {
           <>
             <Section
               title="Nueva canción"
-              description="Formulario de carga con nombre, intérprete y fecha de difusión."
+              description="Formulario de carga con nombre, intérprete, fecha de difusión y cantidad de salidas."
             >
               {/* La `key` remonta el form al cambiar de canción: así los campos se resetean sin efecto. */}
               <SongForm

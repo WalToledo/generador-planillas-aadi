@@ -50,6 +50,9 @@ export function SongTable({ songs, editingId, onEdit, onDelete }: SongTableProps
               Fecha
             </th>
             <th scope="col" className={`${headClasses} text-right`}>
+              Salidas
+            </th>
+            <th scope="col" className={`${headClasses} text-right`}>
               Acciones
             </th>
           </tr>
@@ -65,6 +68,7 @@ export function SongTable({ songs, editingId, onEdit, onDelete }: SongTableProps
               <td className={`${cellClasses} font-medium`}>{song.nombre}</td>
               <td className={cellClasses}>{song.interprete}</td>
               <td className={`${cellClasses} whitespace-nowrap`}>{formatFecha(song.fecha)}</td>
+              <td className={`${cellClasses} text-right tabular-nums`}>{song.salidas}</td>
               <td className={cellClasses}>
                 {/* Los botones son sólo icono: el nombre va en aria-label para que se distingan entre filas. */}
                 <div className="flex justify-end gap-1">
